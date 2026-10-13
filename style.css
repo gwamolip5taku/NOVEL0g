@@ -1,112 +1,183 @@
+/* ==========================================================================
+   NOVELog — 화면 스타일
+   --------------------------------------------------------------------------
+   이 파일은 크게 두 부분으로 나뉜다.
+     1) 사이트 화면 (상단바, 왼쪽 설정 패널, 미리보기 틀) — 어두운 테마
+     2) 결과 이미지 (.canvas-inner 안쪽)                — 흰 바탕
+        → 2)에 적힌 모양이 그대로 PNG가 된다.
+
+   CSS 기본 문법 복습
+     선택자 { 속성: 값; }
+       .이름   → class="이름"인 요소
+       #이름   → id="이름"인 요소
+       A B     → A 안에 있는 B (자손)
+       A > B   → A 바로 아래 B (자식)
+       A + B   → A 바로 다음에 오는 형제 B
+       :hover 등 → 상태 (마우스를 올렸을 때 등)
+       ::before / ::after → 요소 앞/뒤에 CSS로 만드는 가짜 요소
+   ========================================================================== */
+
+
+/* ── 사이트 글꼴 ──────────────────────────────────────────────────────────
+   @font-face: 인터넷에 있는 글꼴 파일을 "OngleipKonkon"이라는 이름으로 등록한다.
+   등록한 뒤에는 font-family: "OngleipKonkon" 으로 쓸 수 있다.
+   (눈누 "옹글잎 콘콘" 글꼴. 굵기는 Regular 하나뿐)
+   font-display: swap → 글꼴을 받기 전엔 기본 글꼴로 먼저 글자를 보여 주고, 도착하면 바꾼다.
+   ※ 결과 이미지용 글꼴(프리텐다드 등)은 여기 없고 script.js가 만들어 넣는다. */
 @font-face {
   font-family: "OngleipKonkon";
   src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/2412-1@1.0/Ownglyph_corncorn-Rg.woff2") format("woff2");
   font-display: swap;
 }
 
+
+/* ── 디자인 변수 (CSS 변수) ────────────────────────────────────────────────
+   :root는 문서 맨 바깥(html)을 뜻한다. 여기 --이름: 값; 으로 변수를 만들어 두면
+   어디서든 var(--이름)으로 꺼내 쓸 수 있다.
+   → 색을 바꾸고 싶으면 여기 한 곳만 고치면 전체에 반영된다. */
 :root {
+  /* 스크롤바·체크박스 같은 브라우저 기본 UI도 어두운 테마로 그린다 */
   color-scheme: dark;
 
-  --bg: #0d0d0d;
-  --panel: #141414;
-  --raise: #1b1b1b;
+  /* 배경색: 가장 어두운 것부터 bg → panel → raise 순으로 밝아진다 */
+  --bg: #0d0d0d;            /* 페이지 바탕 */
+  --panel: #141414;         /* 미리보기 무대 바탕, 선택칸 목록 바탕 */
+  --raise: #1b1b1b;         /* 드래그 중, 비활성 버튼 바탕 등 살짝 떠 보이는 부분 */
 
-  --line: #2a2a2a;
-  --line-strong: #3a3a3a;
+  /* 선 색 */
+  --line: #2a2a2a;          /* 구역 사이 구분선 */
+  --line-strong: #3a3a3a;   /* 입력칸·드롭존 테두리 */
 
+  /* 글자색: text(본문) → muted(보조) → faint(가장 흐림) */
   --text: #ededed;
   --muted: #8c8c8c;
   --faint: #5c5c5c;
 
-  --accent: #3ddaee;
-  --accent-hover: #68e2f2;
-  --accent-ink: #111;
-  --danger: #ff4040;
+  /* 강조색 */
+  --accent: #3ddaee;        /* 하늘색 포인트 (단계 번호, 다운로드 버튼 등) */
+  --accent-hover: #68e2f2;  /* 버튼에 마우스를 올렸을 때 조금 밝은 하늘색 */
+  --accent-ink: #111;       /* 하늘색 위에 올라가는 글자색 (밝은 바탕엔 어두운 글자) */
+  --danger: #ff4040;        /* 오류 표시용 빨간색 */
 
-  --font: "OngleipKonkon", system-ui, sans-serif;
-  --font-output: "JeonjuCraftMyungjo", serif;
+  /* 글꼴 목록: 앞의 글꼴이 없으면 쉼표 뒤의 글꼴을 차례로 시도한다 */
+  --font: "OngleipKonkon", system-ui, sans-serif;   /* 사이트 화면 글꼴 */
+  --font-output: "JeonjuCraftMyungjo", serif;        /* 결과 이미지 기본 글꼴 (script.js가 선택에 맞게 덮어씀) */
 
+  /* 화면 좌우 여백. 상단바·각 단계·미리보기가 모두 이 값을 쓴다.
+     모바일에서는 맨 아래 미디어쿼리에서 이 값 하나만 16px로 바꾼다. */
   --gutter: 24px;
 }
 
+
+/* ── 기본 설정 ───────────────────────────────────────────────────────────── */
+
+/* *: 모든 요소.
+   box-sizing: border-box → width/height에 padding과 border까지 포함해서 계산한다.
+   (기본값은 content-box라서 width: 100%에 padding을 주면 넘쳐 버린다) */
 * { box-sizing: border-box; }
 
+/* hidden 속성이 붙은 요소는 무조건 숨긴다.
+   display: flex 등을 따로 지정한 요소는 hidden이 무시되는 문제가 있어서,
+   !important(우선순위 최상)로 확실하게 숨긴다. */
 [hidden] { display: none !important; }
 
+/* html과 body를 화면 높이(100%)에 꽉 채운다.
+   → 넓은 화면에서는 페이지 전체가 아니라 왼쪽 패널과 미리보기가 "각자" 스크롤된다. */
 html, body { height: 100%; }
 
 body {
-  margin: 0;
-  display: flex;
-  flex-direction: column;
+  margin: 0;                  /* 브라우저 기본 여백(8px) 제거 */
+  display: flex;              /* 자식들을 flex로 배치 */
+  flex-direction: column;     /* 세로 방향으로 [상단바][레이아웃] 쌓기 */
   background: var(--bg);
   color: var(--text);
-  font: 14px/1.5 var(--font);
+  font: 14px/1.5 var(--font); /* 줄임 표기: 글자 크기 14px / 줄 높이 1.5배 / 글꼴 */
 }
 
+/* 버튼·입력칸은 브라우저가 기본 글꼴과 색을 따로 정해 둔다.
+   inherit(물려받기)로 바꿔서 부모(body)와 같은 글꼴·색을 쓰게 한다. */
 button, input, select, textarea { font: inherit; color: inherit; }
 
+
+/* ── 상단바 ───────────────────────────────────────────────────────────────
+   왼쪽: 로고/이름, 오른쪽: 안내 문구 */
 .topbar {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 14px var(--gutter);
+  align-items: center;              /* 세로 가운데 정렬 */
+  justify-content: space-between;   /* 양 끝으로 벌리기 */
+  gap: 16px;                        /* 자식 사이 간격 */
+  padding: 14px var(--gutter);      /* 위아래 14px, 좌우 24px */
   border-bottom: 1px solid var(--line);
 }
 
 .brand { display: flex; align-items: center; gap: 10px; font-size: 13px; }
-.brand-mark { width: 14px; height: 14px; background: var(--accent); }
-.brand-name { letter-spacing: 0.14em; }
+.brand-mark { width: 14px; height: 14px; background: var(--accent); }   /* 하늘색 네모 로고 */
+.brand-name { letter-spacing: 0.14em; }                                /* 자간 넓게 (em = 글자 크기 기준 배수) */
 .brand-sub { color: var(--muted); }
 .topbar-note { margin: 0; color: var(--faint); font-size: 12px; }
 
+
+/* ── 본문 레이아웃 ────────────────────────────────────────────────────────
+   CSS Grid로 [왼쪽 360px][오른쪽 나머지 전부] 두 칸을 만든다. */
 .layout {
-  flex: 1;
-  min-height: 0;
+  flex: 1;          /* body(세로 flex)에서 상단바를 뺀 남은 높이를 전부 차지 */
+  min-height: 0;    /* flex 자식은 기본적으로 내용보다 작아지지 않는다.
+                       이걸 0으로 풀어야 안쪽 패널에 스크롤이 생긴다. */
   display: grid;
+  /* minmax(0, 1fr): 남는 폭 전부(1fr)를 쓰되, 내용이 길어도 화면 밖으로 늘어나지 않게 최소 0 */
   grid-template-columns: 360px minmax(0, 1fr);
 }
 
+/* 왼쪽 설정 패널. 내용이 길면 패널 안에서만 세로 스크롤 */
 .panel {
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
+  overflow-y: auto;          /* 넘치면 스크롤바 표시 */
   border-right: 1px solid var(--line);
 }
 
+/* 01~04 각 단계 구역 */
 .step { padding: 20px var(--gutter); border-bottom: 1px solid var(--line); }
 
+/* 03 이미지처럼 제목 오른쪽에 버튼이 붙는 머리줄 */
 .step-head { display: flex; align-items: baseline; justify-content: space-between; }
 
 .step-title {
   display: flex;
-  align-items: baseline;
+  align-items: baseline;   /* baseline: 크기가 다른 글자들의 밑선을 맞춤 ("01"과 "글") */
   gap: 10px;
-  margin: 0 0 12px;
+  margin: 0 0 12px;        /* 위 0, 좌우 0, 아래 12px */
   font-size: 13px;
-  font-weight: 400;
+  font-weight: 400;        /* h2는 기본이 굵게라서 보통 굵기로 되돌림 */
 }
-.step-no { color: var(--accent); font-size: 12px; }
+.step-no { color: var(--accent); font-size: 12px; }   /* "01", "02" 번호 */
 .step-actions { display: flex; gap: 12px; }
 
+/* 밑줄 친 글자 모양의 버튼 (위치 초기화 / 제거) */
 .link-btn {
   padding: 0;
   border: 0;
-  background: none;
+  background: none;              /* 버튼 기본 배경 제거 */
   color: var(--muted);
   font-size: 12px;
   text-decoration: underline;
-  text-underline-offset: 3px;
-  cursor: pointer;
+  text-underline-offset: 3px;    /* 밑줄을 글자에서 3px 띄움 */
+  cursor: pointer;               /* 마우스 커서를 손가락 모양으로 */
 }
+/* :hover:not(:disabled) → 마우스를 올렸고, 꺼진 상태가 아닐 때만 */
 .link-btn:hover:not(:disabled) { color: var(--text); }
 .link-btn:disabled { color: var(--faint); text-decoration: none; cursor: default; }
 
+/* 작은 안내 문구 */
 .hint { margin: 10px 0 0; color: var(--faint); font-size: 12px; }
 
+
+/* ── 01 글 입력칸 ──────────────────────────────────────────────────────── */
+
+/* .field 바로 뒤에 오는 .field에만 위 여백 → 칸 사이에만 간격이 생긴다 */
 .field + .field { margin-top: 16px; }
 
+/* [이름 ······ 글자 크기 px] 머리줄 */
 .field-head {
   display: flex;
   align-items: center;
@@ -115,40 +186,50 @@ button, input, select, textarea { font: inherit; color: inherit; }
 }
 .field-label { color: var(--muted); font-size: 12px; }
 
+/* 글자 크기 숫자칸 묶음 ([70] px) */
 .size-input { display: flex; align-items: center; gap: 4px; color: var(--faint); font-size: 12px; }
 .size-input input {
   width: 52px;
   padding: 2px 6px;
   border: 1px solid var(--line-strong);
-  border-radius: 0;
-  background: transparent;
+  border-radius: 0;                   /* iOS 사파리가 넣는 둥근 모서리 제거 */
+  background: transparent;            /* 배경 투명 */
   color: var(--text);
-  text-align: right;
-  font-variant-numeric: tabular-nums;
+  text-align: right;                  /* 숫자 오른쪽 정렬 */
+  font-variant-numeric: tabular-nums; /* 숫자 폭을 모두 같게 (자릿수가 바뀌어도 흔들리지 않음) */
 }
+/* :focus → 입력칸을 눌러 커서가 들어간 상태. 기본 외곽선 대신 테두리만 하늘색으로 */
 .size-input input:focus { outline: none; border-color: var(--accent); }
 
+/* 제목·부제목(contenteditable div)과 본문(textarea) 공통 모양 */
 .editable {
   min-height: 42px;
   padding: 10px 12px;
   border: 1px solid var(--line-strong);
   outline: none;
   line-height: 1.6;
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
+  white-space: pre-wrap;     /* 연속 공백과 줄바꿈을 입력한 그대로 보여 줌 */
+  overflow-wrap: anywhere;   /* 띄어쓰기 없는 긴 글자도 칸 밖으로 넘치지 않고 줄바꿈 */
 }
 .editable:focus { border-color: var(--accent); }
+
+/* 본문(textarea)만 추가로 */
 .editable-body {
-  display: block;
+  display: block;            /* textarea는 기본이 inline이라 아래 빈틈이 생겨서 block으로 */
   width: 100%;
   min-height: 200px;
   background: transparent;
-  resize: vertical;
+  resize: vertical;          /* 오른쪽 아래 모서리를 끌어 세로 크기만 바꿀 수 있게 */
 }
 
+/* 비어 있을 때 안내 문구 보여 주기
+   · contenteditable div: :empty(내용이 없음)일 때 ::before로 data-placeholder 글자를 꺼내 표시
+     attr(이름) → HTML 속성 값을 CSS 글자로 가져온다
+   · textarea: 원래 placeholder 속성이 있어서 ::placeholder로 색만 바꾼다 */
 .editable:empty::before { content: attr(data-placeholder); color: var(--faint); }
 .editable::placeholder { color: var(--faint); }
 
+/* "Markdown" 작은 딱지 */
 .badge {
   margin-left: 6px;
   padding: 0 5px;
@@ -158,38 +239,54 @@ button, input, select, textarea { font: inherit; color: inherit; }
   letter-spacing: 0.04em;
 }
 
+/* 마크다운 문법 요약 (<code> 기호들) */
 .md-hint { line-height: 1.9; }
 .md-hint code {
   padding: 1px 5px;
   background: var(--raise);
   color: var(--muted);
+  /* 고정폭(모든 글자 폭이 같은) 글꼴. 운영체제마다 있는 것을 차례로 시도 */
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 11px;
 }
 
+
+/* ── 파일 드롭존 (02 글꼴 업로드, 03 이미지) ───────────────────────────────
+   <label class="drop"> 안에 투명한 <input type="file">을 꽉 채워 깔아 둔 구조.
+   script.js가 상태에 따라 클래스를 붙인다:
+     .is-over   파일을 끌고 위에 올라와 있는 중
+     .is-loaded 파일을 제대로 읽음
+     .is-error  파일을 읽지 못함 */
 .drop {
-  position: relative;
+  position: relative;        /* 안쪽 input을 이 상자 기준으로 꽉 채우기 위한 기준점 */
   display: flex;
   flex-direction: column;
   gap: 4px;
   padding: 16px;
-  border: 1px dashed var(--line-strong);
+  border: 1px dashed var(--line-strong);   /* 비어 있을 땐 점선 테두리 */
   cursor: pointer;
+  /* transition: 색이 바뀔 때 0.15초 동안 부드럽게 */
   transition: border-color 0.15s, background-color 0.15s;
 }
+/* 실제 파일 입력칸: 상자 전체를 덮고(inset: 0 = 상하좌우 0) 투명하게(opacity: 0) */
 .drop input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
 
 .drop:hover, .drop.is-over { border-color: var(--accent); }
 .drop.is-over { background: var(--raise); }
+/* :focus-within → 안쪽 요소(input)에 키보드 포커스가 있을 때. Tab으로 이동했을 때 위치가 보이게 */
 .drop:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-.drop-main { overflow-wrap: anywhere; }
+.drop-main { overflow-wrap: anywhere; }            /* 긴 파일 이름도 줄바꿈 */
 .drop-meta { color: var(--muted); font-size: 12px; }
 
+/* 읽기 성공: 실선 테두리 + 왼쪽에 굵은 하늘색 줄 */
 .drop.is-loaded { border: 1px solid var(--line-strong); border-left: 3px solid var(--accent); }
+/* 읽기 실패: 테두리와 설명을 빨갛게. (상자 전체 글자가 빨개지므로 파일 이름만 원래 색으로) */
 .drop.is-error, .drop.is-error .drop-meta { border-color: var(--danger); color: var(--danger); }
 .drop.is-error .drop-main { color: var(--text); }
 
+
+/* ── 03 이미지 폭 슬라이더 ─────────────────────────────────────────────── */
 .range-row {
   display: flex;
   justify-content: space-between;
@@ -197,41 +294,52 @@ button, input, select, textarea { font: inherit; color: inherit; }
   margin: 16px 0 6px;
 }
 .range-value { font-size: 12px; font-variant-numeric: tabular-nums; }
+/* accent-color: 슬라이더·체크박스 같은 기본 UI의 강조색을 한 번에 바꾸는 속성 */
 .range { width: 100%; margin: 0; accent-color: var(--accent); cursor: pointer; }
-.range:disabled { cursor: not-allowed; opacity: 0.4; }
+.range:disabled { cursor: not-allowed; opacity: 0.4; }   /* 이미지가 없을 땐 흐리게 */
+/* :focus-visible → 키보드로 포커스했을 때만 (마우스 클릭 땐 표시 안 함) */
 .range:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
 
+
+/* ── 02 글꼴 선택칸 ────────────────────────────────────────────────────── */
 .font-hint { margin: 8px 0 12px; }
-.drop-sm { padding: 12px 14px; }
+.drop-sm { padding: 12px 14px; }   /* 글꼴 업로드용 작은 드롭존 */
 
 .select {
   width: 100%;
-  padding: 9px 36px 9px 12px;
+  padding: 9px 36px 9px 12px;   /* 위 오른쪽 아래 왼쪽 순. 오른쪽 36px는 화살표 자리 */
   border: 1px solid var(--line-strong);
   border-radius: 0;
   background: transparent;
-  appearance: none;
+  appearance: none;             /* 브라우저 기본 모양(기본 화살표 포함)을 없앤다 */
   cursor: pointer;
-  text-overflow: ellipsis;
+  text-overflow: ellipsis;      /* 글자가 길면 "…"으로 자름 */
 }
 .select:focus { outline: none; border-color: var(--accent); }
+/* 펼쳤을 때 나오는 목록도 어두운 색으로 (윈도우 크롬에서 흰 바탕으로 나오는 것 방지) */
 .select option,
 .select optgroup { background: var(--panel); color: var(--text); }
 
+/* 직접 그린 화살표 ∨
+   6×6 상자에 오른쪽·아래 테두리만 그린 뒤 45도 돌리면 ∨ 모양이 된다.
+   <select>에는 ::after를 붙일 수 없어서 감싸는 div(.select-wrap)에 붙인다. */
 .select-wrap { position: relative; min-width: 0; }
 .select-wrap::after {
-  content: "";
-  position: absolute;
+  content: "";                  /* ::after는 content가 있어야 화면에 나타난다 (빈 글자라도) */
+  position: absolute;           /* .select-wrap(relative) 기준으로 위치 지정 */
   top: 50%;
   right: 14px;
   width: 6px;
   height: 6px;
   border-right: 1px solid var(--muted);
   border-bottom: 1px solid var(--muted);
-  transform: translateY(-70%) rotate(45deg);
-  pointer-events: none;
+  transform: translateY(-70%) rotate(45deg);   /* 살짝 위로 올리고 45도 회전 */
+  pointer-events: none;         /* 화살표를 눌러도 클릭이 아래 선택칸으로 통과되게 */
 }
 
+
+/* ── 04 크기 ─────────────────────────────────────────────────────────────
+   [가로][숫자 입력칸 (남는 폭 전부)][px] 한 줄 */
 .size-row { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px; }
 .unit { color: var(--faint); font-size: 12px; }
 
@@ -245,8 +353,14 @@ button, input, select, textarea { font: inherit; color: inherit; }
 }
 .text-input:focus { outline: none; border-color: var(--accent); }
 
+
+/* ── 다운로드 버튼 구역 ───────────────────────────────────────────────── */
+
+/* margin-top: auto → flex 세로 배치에서 남는 공간을 위쪽 여백으로 다 가져간다.
+   그래서 패널 내용이 짧을 때도 이 구역이 패널 맨 아래에 붙는다. */
 .export { margin-top: auto; padding: 20px var(--gutter) 28px; }
 
+/* 하늘색 큰 버튼 */
 .primary {
   width: 100%;
   padding: 14px;
@@ -258,11 +372,16 @@ button, input, select, textarea { font: inherit; color: inherit; }
 }
 .primary:hover:not(:disabled) { background: var(--accent-hover); }
 .primary:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+/* PNG를 만드는 중(disabled)에는 회색 + 기다림 커서(progress) */
 .primary:disabled { background: var(--raise); color: var(--faint); cursor: progress; }
 
+/* 버튼 아래 상태 문구. 오류일 땐 script.js가 is-error를 붙여 빨갛게 */
 .status { margin: 10px 0 0; color: var(--muted); font-size: 12px; }
 .status.is-error { color: var(--danger); }
 
+
+/* ── 미리보기 틀 ──────────────────────────────────────────────────────────
+   위: [미리보기 | PNG 크기] 막대, 아래: 결과 이미지를 올려 두는 무대 */
 .preview { display: flex; flex-direction: column; min-width: 0; }
 
 .preview-bar {
@@ -276,124 +395,177 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .preview-label { color: var(--muted); letter-spacing: 0.08em; }
 .preview-count { font-variant-numeric: tabular-nums; }
 
+/* 결과 이미지 바깥의 어두운 무대. 이미지가 길면 이 안에서 스크롤된다. */
 .preview-stage {
-  flex: 1;
-  min-height: 0;
+  flex: 1;           /* 미리보기 막대를 뺀 남은 높이 전부 */
+  min-height: 0;     /* 위의 .layout과 같은 이유 (스크롤이 생기게) */
   overflow-y: auto;
   padding: var(--gutter);
   background: var(--panel);
 }
 
+
+/* ==========================================================================
+   결과 이미지 (.canvas 안쪽)
+   --------------------------------------------------------------------------
+   · 여기 적힌 모양이 그대로 PNG가 된다.
+   · .canvas-inner는 항상 "설정한 가로 폭(px)"으로 그려지고,
+     script.js가 transform: scale()로 미리보기 칸에 맞게 줄여서 보여 준다.
+     그래서 화면 크기가 달라도(모바일 포함) 결과 이미지 배치는 늘 같다.
+   ========================================================================== */
+
+/* 축소된 결과를 담는 껍데기.
+   transform으로 줄인 요소는 "원래 크기만큼 자리를 차지"하므로,
+   overflow: hidden으로 넘치는 부분을 가리고 높이는 script.js가 (원래 높이 × 배율)로 맞춘다. */
 .canvas {
   position: relative;
   width: 100%;
   overflow: hidden;
   background: #fff;
-  box-shadow: 0 0 0 1px var(--line);
+  box-shadow: 0 0 0 1px var(--line);   /* 테두리처럼 보이지만 크기 계산에 영향을 주지 않는 그림자 */
 }
 
+/* ★ 실제로 PNG가 되는 부분 ★ [이미지 칸][글 칸]을 가로로 나란히 */
 .canvas-inner {
   display: flex;
-  align-items: stretch;
-  min-height: 400px;
+  align-items: stretch;        /* 자식 높이를 같게 → 이미지 칸이 글 칸 높이만큼 늘어난다 */
+  min-height: 400px;           /* 기본값. 실제로는 script.js가 가로 폭에 비례해 덮어씀 */
   background: #fff;
   color: #111;
   font-family: var(--font-output);
-  transform-origin: 0 0;
+  transform-origin: 0 0;       /* 축소 기준점을 왼쪽 위로 (기본은 가운데) */
 }
 
+/* 왼쪽 이미지 칸. 폭(%)은 script.js가 슬라이더 값으로 지정 */
 .img-area {
   position: relative;
-  flex-shrink: 0;
+  flex-shrink: 0;              /* 글이 길어도 이미지 칸이 줄어들지 않게 */
   min-width: 40px;
   overflow: hidden;
-  cursor: grab;
-  touch-action: none;
-  user-select: none;
+  cursor: grab;                /* 손바닥 커서 → "끌 수 있다"는 표시 */
+  touch-action: none;          /* 모바일에서 손가락으로 끌 때 페이지가 같이 스크롤되지 않게 */
+  user-select: none;           /* 끌다가 글자가 파랗게 선택되지 않게 */
 }
-.img-area.is-dragging { cursor: grabbing; }
+.img-area.is-dragging { cursor: grabbing; }   /* 끄는 중엔 주먹 쥔 커서 */
+
+/* 이미지는 배경으로 깐다 */
 .img-inner {
   width: 100%;
   height: 100%;
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-position: 50% 50%;
+  background-repeat: no-repeat;     /* 반복하지 않음 */
+  background-size: cover;           /* 비율을 지키면서 칸을 꽉 채움 (넘치는 부분은 잘림) */
+  background-position: 50% 50%;     /* 보이는 위치. 50% 50% = 가운데. 끌면 script.js가 바꿈 */
 }
 
+/* 오른쪽 글 칸. padding(여백)과 gap(간격)은 가로 폭에 비례하도록 script.js가 지정 */
 .text-area {
-  flex: 1;
-  min-width: 0;
+  flex: 1;                     /* 이미지 칸을 뺀 나머지 폭 전부 */
+  min-width: 0;                /* 긴 글이 칸을 밀어내지 않게 */
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  flex-direction: column;      /* 제목/부제목/본문을 세로로 */
+  align-items: flex-start;     /* 왼쪽 정렬 */
 }
 
+/* 세 칸 공통: 줄바꿈 유지 + 긴 단어 줄바꿈 */
 .title-preview,
 .subtitle-preview,
 .body-preview { max-width: 100%; white-space: pre-wrap; overflow-wrap: anywhere; }
 
+/* line-height: 줄 높이 (글자 크기의 몇 배). 큰 글자일수록 좁게 잡는다.
+   글꼴과 굵기는 02 글꼴 선택에 따라 script.js가 지정한다. */
 .title-preview { line-height: 1.1; }
 .subtitle-preview { line-height: 1.4; }
+/* 본문은 마크다운이 <p>, <br>로 줄을 나누므로 white-space를 normal로 되돌림 */
 .body-preview { line-height: 1.6; white-space: normal; }
-.body-preview strong { font-weight: 700; }
+.body-preview strong { font-weight: 700; }   /* **굵게**는 본문 굵기와 상관없이 항상 Bold */
 
+
+/* ── 본문 마크다운 모양 ────────────────────────────────────────────────────
+   크기·간격을 em(본문 글자 크기 기준 배수)으로 잡았다.
+   → 본문 글자 크기를 바꾸면 제목, 목록 들여쓰기, 문단 간격이 전부 같이 커진다. */
+
+/* 브라우저 기본 여백을 없앤 뒤, 블록 "사이"에만 0.9em 간격 */
 .body-preview > * { margin: 0; }
 .body-preview > * + * { margin-top: 0.9em; }
+
+/* # 제목 (h1~h3) */
 .body-preview h1,
 .body-preview h2,
 .body-preview h3 { font-weight: 700; line-height: 1.3; }
 .body-preview h1 { font-size: 1.6em; }
 .body-preview h2 { font-size: 1.35em; }
 .body-preview h3 { font-size: 1.15em; }
+/* 제목 앞에는 간격을 더 넓게 (새 단락이 시작되는 느낌) */
 .body-preview * + h1,
 .body-preview * + h2,
 .body-preview * + h3 { margin-top: 1.4em; }
+
+/* 목록: 왼쪽 들여쓰기, 항목 사이 약간의 간격 */
 .body-preview ul,
 .body-preview ol { padding-left: 1.4em; }
 .body-preview li + li { margin-top: 0.25em; }
+
+/* > 인용: 왼쪽 회색 세로줄 + 흐린 글자 */
 .body-preview blockquote {
   padding-left: 0.9em;
   border-left: 0.15em solid #bbb;
   color: #555;
 }
+
+/* --- 구분선: 짧은 가로선 */
 .body-preview hr {
   width: 3em;
   height: 0;
   margin-top: 1.6em;
   margin-bottom: 1.6em;
-  border: 0;
-  border-top: 1px solid #999;
+  border: 0;                    /* 브라우저 기본 hr 모양 제거 */
+  border-top: 1px solid #999;   /* 윗선 하나만 그려서 선으로 보이게 */
 }
-.body-preview hr + * { margin-top: 0; }
+.body-preview hr + * { margin-top: 0; }   /* 구분선 아래쪽은 hr의 margin-bottom으로 충분 */
+
+/* `코드` */
 .body-preview code {
   padding: 0.05em 0.3em;
   background: #f1f1f1;
   font-family: ui-monospace, Menlo, Consolas, monospace;
   font-size: 0.88em;
 }
+/* ``` 코드 블록 */
 .body-preview pre {
   padding: 0.8em 1em;
   background: #f4f4f4;
-  white-space: pre-wrap;
+  white-space: pre-wrap;        /* 코드 줄바꿈·들여쓰기 그대로, 길면 줄바꿈 */
 }
-.body-preview pre code { padding: 0; background: none; }
-.body-preview del { color: #777; }
+.body-preview pre code { padding: 0; background: none; }   /* 블록 안의 code는 배경 중복 제거 */
+.body-preview del { color: #777; }                         /* ~~취소선~~ */
 
+/* 비어 있는 칸은 아예 숨긴다.
+   그래야 부제목을 안 썼을 때 그 자리 간격(gap)이 생기지 않는다. */
 .title-preview:empty,
 .subtitle-preview:empty,
 .body-preview:empty { display: none; }
 
+
+/* ── 미디어쿼리 ───────────────────────────────────────────────────────────
+   @media (조건) { ... } → 조건이 맞을 때만 안쪽 CSS를 적용한다. */
+
+/* 운영체제에서 "동작 줄이기"를 켠 사용자에게는 전환 효과를 끈다 (접근성) */
 @media (prefers-reduced-motion: reduce) {
   .drop { transition: none; }
 }
 
+/* 좁은 화면 (화면 폭 860px 이하: 태블릿·모바일)
+   두 칸 → 한 칸으로 바꾸고, 설정 패널 아래에 미리보기를 쌓는다.
+   이때는 각자 스크롤이 아니라 페이지 전체가 스크롤된다.
+   ⚠ 결과 이미지(.canvas-inner 안쪽) 배치는 여기서 바꾸지 않는다. 바꾸면 기기마다 PNG가 달라진다. */
 @media (max-width: 860px) {
-  :root { --gutter: 16px; }
-  body { height: auto; }
-  .topbar { flex-direction: column; align-items: flex-start; }
-  .layout { grid-template-columns: 1fr; }
+  :root { --gutter: 16px; }   /* 좌우 여백을 한 번에 줄임 (변수의 장점) */
+  body { height: auto; }      /* 화면 높이 고정을 풀어서 페이지가 길어질 수 있게 */
+  .topbar { flex-direction: column; align-items: flex-start; }   /* 로고와 안내 문구를 위아래로 */
+  .layout { grid-template-columns: 1fr; }                        /* 한 칸 */
   .panel { overflow: visible; border-right: 0; border-bottom: 1px solid var(--line); }
   .preview-stage { flex: none; overflow: visible; }
 
+  /* iOS는 글자 크기 16px 미만인 입력칸을 누르면 화면을 자동 확대하므로 16px로 맞춘다 */
   .text-input, .editable, .size-input input, .select { font-size: 16px; }
 }
