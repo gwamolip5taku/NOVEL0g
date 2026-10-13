@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ko-KR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="dark" />
+  <title>NOVELog</title>
+  <link rel="icon" href="imgs/favi.png" type="image/png" />
+
+  <link rel="preload" href="https://cdn.jsdelivr.net/gh/projectnoonnu/2412-1@1.0/Ownglyph_corncorn-Rg.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="stylesheet" href="style.css" />
+
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" defer></script>
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-name">NOVELOG</span>
+      <span class="brand-sub">글과 이미지를 한 장으로</span>
+    </div>
+    <p class="topbar-note">별도의 서버 없이 브라우저 안에서만 동작합니다.<br>입력한 글과 이미지는 어디에도 업로드되지 않습니다.</p>
+  </header>
+
+  <div class="layout">
+    <aside class="panel">
+      <section class="step">
+        <h2 class="step-title"><span class="step-no">01</span>글</h2>
+
+        <div class="field">
+          <div class="field-head">
+            <span class="field-label" id="title-label">제목</span>
+            <span class="size-input">
+              <input type="number" id="title-size" value="70" min="10" step="1" aria-label="제목 글자 크기" />px
+            </span>
+          </div>
+          <div class="editable" id="title-input" contenteditable="true" role="textbox" aria-labelledby="title-label" aria-multiline="true" data-placeholder="제목을 입력하세요"></div>
+        </div>
+
+        <div class="field">
+          <div class="field-head">
+            <span class="field-label" id="subtitle-label">부제목</span>
+            <span class="size-input">
+              <input type="number" id="subtitle-size" value="40" min="10" step="1" aria-label="부제목 글자 크기" />px
+            </span>
+          </div>
+          <div class="editable" id="subtitle-input" contenteditable="true" role="textbox" aria-labelledby="subtitle-label" aria-multiline="true" data-placeholder="부제목을 입력하세요"></div>
+        </div>
+
+        <div class="field">
+          <div class="field-head">
+            <label class="field-label" for="body-input">본문 <span class="badge">Markdown</span></label>
+            <span class="size-input">
+              <input type="number" id="body-size" value="25" min="10" step="1" aria-label="본문 글자 크기" />px
+            </span>
+          </div>
+          <textarea class="editable editable-body" id="body-input" spellcheck="false" placeholder="본문을 마크다운으로 입력하세요"></textarea>
+          <p class="hint md-hint">
+            <code>**굵게**</code> <code>*기울임*</code> <code>~~취소선~~</code><br>
+            <code>- 목록</code> <code>1. 번호</code> <code>&gt; 인용</code><br>
+            빈 줄로 문단을 나눕니다.<br>엔터 한 번은 줄바꿈이 됩니다.
+          </p>
+        </div>
+      </section>
+
+      <section class="step">
+        <h2 class="step-title"><span class="step-no">02</span>글꼴</h2>
+        <div class="select-wrap font-select">
+          <select class="select" id="font" aria-label="글꼴"></select>
+        </div>
+        <p class="hint font-hint">제목·부제목·본문에 모두 적용됩니다. 제목은 항상 굵게 표시됩니다.</p>
+        <label class="drop drop-sm" id="drop-font">
+          <input type="file" id="file-font" accept=".woff2,.woff,.ttf,.otf" multiple />
+          <span class="drop-main" id="main-font">글꼴 파일 업로드</span>
+          <span class="drop-meta" id="meta-font">woff2 · woff · ttf · otf 파일을 지원합니다.</span>
+        </label>
+      </section>
+
+      <section class="step">
+        <div class="step-head">
+          <h2 class="step-title"><span class="step-no">03</span>이미지</h2>
+          <div class="step-actions">
+            <button type="button" class="link-btn" id="img-reset" disabled>위치 초기화</button>
+            <button type="button" class="link-btn" id="img-remove" disabled>제거</button>
+          </div>
+        </div>
+        <label class="drop" id="drop-img">
+          <input type="file" id="file-img" accept="image/*" />
+          <span class="drop-main" id="main-img">이미지 파일</span>
+          <span class="drop-meta" id="meta-img">글 왼쪽에 붙는 이미지입니다.<br>선택 사항이며, 칸에 맞게 잘려서 채워집니다. <br>미리보기에서 이미지를 끌면 보이는 위치를 옮길 수 있습니다.</span>
+        </label>
+        <div class="range-row">
+          <label class="field-label" for="img-width">이미지 폭</label>
+          <span class="range-value" id="img-width-value">30%</span>
+        </div>
+        <input type="range" class="range" id="img-width" min="10" max="90" value="30" disabled />
+      </section>
+
+      <section class="step">
+        <h2 class="step-title"><span class="step-no">04</span>크기</h2>
+        <div class="size-row">
+          <label class="field-label" for="canvas-width">가로</label>
+          <input type="number" class="text-input" id="canvas-width" value="2000" min="400" step="10" />
+          <span class="unit">px</span>
+        </div>
+        <p class="hint">PNG가 이 폭 그대로 저장됩니다. 여백과 간격은 폭에 맞춰 자동으로 조절됩니다.</p>
+      </section>
+
+      <div class="export">
+        <button type="button" class="primary" id="download">PNG 다운로드</button>
+        <p class="status" id="status">파일 이름은 제목을 따릅니다.</p>
+      </div>
+    </aside>
+
+    <main class="preview">
+      <div class="preview-bar">
+        <span class="preview-label">미리보기</span>
+        <span class="preview-count" id="out-size">—</span>
+      </div>
+      <div class="preview-stage">
+        <div class="canvas" id="canvas">
+          <div class="canvas-inner" id="canvas-inner">
+            <div class="img-area" id="img-area" hidden>
+              <div class="img-inner" id="img-inner"></div>
+            </div>
+            <div class="text-area">
+              <div class="title-preview" id="title-preview"></div>
+              <div class="subtitle-preview" id="subtitle-preview"></div>
+              <div class="body-preview" id="body-preview"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>
